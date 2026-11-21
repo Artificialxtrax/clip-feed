@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clip feed</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { margin: 0; font: 15px/1.4 system-ui, sans-serif; background: #0b0b0f; color: #eee; }
+    header { padding: 16px 20px; border-bottom: 1px solid #222; }
+    h1 { margin: 0; font-size: 18px; }
+    .meta { color: #888; font-size: 13px; margin-top: 4px; }
+    grid { display: block; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; padding: 16px; }
+    article { background: #16161c; border-radius: 10px; overflow: hidden; }
+    article img, article video { width: 100%; aspect-ratio: 9/16; object-fit: cover; display: block; background: #000; }
+    article div { padding: 8px 10px 12px; }
+    .title { font-weight: 600; }
+    .sub { color: #999; font-size: 12px; margin-top: 2px; }
+    .tag { display: inline-block; margin-top: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: #c6f; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Clip feed</h1>
+    <div class="meta" id="meta">Loading…</div>
+  </header>
+  <div class="grid" id="grid"></div>
+  <script>
+    fetch("manifest.json").then(r => r.json()).then(data => {
+      const n = (data.clips || []).length;
+      document.getElementById("meta").textContent =
+        n + " clips · updated " + (data.updated || "");
+      const grid = document.getElementById("grid");
+      for (const c of data.clips || []) {
+        const el = document.createElement("article");
+        el.innerHTML =
+          '<video muted playsinline preload="none" poster="' + c.thumb +
+          '" src="' + c.file + '" controls></video><div><div class="title">' +
+          (c.title || "") + '</div><div class="sub">' +
+          (c.streamer || "") + " · " + (c.channel || "") +
+          '</div><div class="tag">' + (c.status || "") + "</div></div>";
+        grid.appendChild(el);
+      }
+    }).catch(() => {
+      document.getElementById("meta").textContent = "Could not load manifest.json";
+    });
+  </script>
+</body>
+</html>
